@@ -7,7 +7,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 @UtilityClass
 public class UserMapper {
 
-    public static UserDto toDto(User user) {
+    public UserDto toDto(User user) {
         if (user == null) {
             return null;
         }
@@ -18,7 +18,7 @@ public class UserMapper {
                 .build();
     }
 
-    public static User toUser(UserDto dto) {
+    public User toUser(UserDto dto) {
         if (dto == null) {
             return null;
         }

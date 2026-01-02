@@ -43,6 +43,16 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleForbiddenException(final ForbiddenException e) {
+        log.warn("Forbidden: {}", e.getMessage());
+        return ErrorResponse.of(
+                HttpStatus.FORBIDDEN.value(),
+                "Forbidden",
+                e.getMessage());
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getFieldErrors().stream()

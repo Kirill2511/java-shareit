@@ -11,7 +11,7 @@ public interface UserService {
 
     UserDto getById(Long id);
 
-    User getUserById(Long id);
+    User findUserEntityById(Long id);
 
     Collection<UserDto> getAll();
 

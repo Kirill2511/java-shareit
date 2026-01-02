@@ -8,7 +8,7 @@ import ru.practicum.shareit.user.User;
 @UtilityClass
 public class ItemMapper {
 
-    public static ItemDto toDto(Item item) {
+    public ItemDto toDto(Item item) {
         if (item == null) {
             return null;
         }
@@ -22,7 +22,7 @@ public class ItemMapper {
                 .build();
     }
 
-    public static Item toItem(ItemDto dto, User owner) {
+    public Item toItem(ItemDto dto, User owner) {
         if (dto == null) {
             return null;
         }

@@ -3,8 +3,8 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -25,7 +25,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(Long ownerId, ItemDto itemDto) {
-        User owner = userService.getUserById(ownerId);
+        User owner = userService.findUserEntityById(ownerId);
 
         Item item = ItemMapper.toItem(itemDto, owner);
         Item savedItem = itemRepository.save(item);
@@ -43,7 +43,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getByOwnerId(Long ownerId) {
-        userService.getUserById(ownerId); // validates owner exists
+        userService.findUserEntityById(ownerId); // validates owner exists
 
         return itemRepository.findByOwnerId(ownerId).stream()
                 .map(ItemMapper::toDto)
@@ -52,14 +52,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto update(Long ownerId, Long itemId, ItemDto itemDto) {
-        userService.getUserById(ownerId); // validates owner exists
+        userService.findUserEntityById(ownerId); // validates owner exists
 
         Item existingItem = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found with id: " + itemId));
 
         // Check if the user is the owner
         if (existingItem.getOwner() == null || !existingItem.getOwner().getId().equals(ownerId)) {
-            throw new ValidationException("Only the owner can edit the item");
+            throw new ForbiddenException("Only the owner can edit the item");
         }
 
         // Partial update - only update non-null fields
@@ -82,13 +82,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void delete(Long ownerId, Long itemId) {
-        userService.getUserById(ownerId); // validates owner exists
+        userService.findUserEntityById(ownerId); // validates owner exists
 
         Item existingItem = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found with id: " + itemId));
 
         if (existingItem.getOwner() == null || !existingItem.getOwner().getId().equals(ownerId)) {
-            throw new ValidationException("Only the owner can delete the item");
+            throw new ForbiddenException("Only the owner can delete the item");
         }
 
         itemRepository.deleteById(itemId);
