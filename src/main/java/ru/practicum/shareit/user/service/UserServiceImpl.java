@@ -86,11 +86,9 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateEmailUniqueness(String email, Long excludeUserId) {
-        userRepository.findByEmail(email)
+        userRepository.findByEmail(email, excludeUserId)
                 .ifPresent(existingUser -> {
-                    if (excludeUserId == null || !existingUser.getId().equals(excludeUserId)) {
-                        throw new ConflictException("Email already in use: " + email);
-                    }
+                    throw new ConflictException("Email already in use: " + email);
                 });
     }
 }
