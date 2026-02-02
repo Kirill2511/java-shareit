@@ -76,8 +76,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "where b.item.id = :itemId " +
             "and b.status = :status " +
             "and b.start <= :now " +
-            "order by b.start desc")
-    List<Booking> findLastBooking(@Param("itemId") Long itemId,
+            "order by b.start desc " +
+            "limit 1")
+    Booking findFirstLastBooking(@Param("itemId") Long itemId,
                                   @Param("status") BookingStatus status,
                                   @Param("now") LocalDateTime now);
 
@@ -85,18 +86,40 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "where b.item.id = :itemId " +
             "and b.status = :status " +
             "and b.start > :now " +
-            "order by b.start asc")
-    List<Booking> findNextBooking(@Param("itemId") Long itemId,
+            "order by b.start asc " +
+            "limit 1")
+    Booking findFirstNextBooking(@Param("itemId") Long itemId,
                                   @Param("status") BookingStatus status,
                                   @Param("now") LocalDateTime now);
+
+    // Батч-загрузка последних бронирований для нескольких вещей
+    @Query("select b from Booking b " +
+            "where b.item.id in :itemIds " +
+            "and b.status = :status " +
+            "and b.start <= :now " +
+            "order by b.item.id, b.start desc")
+    List<Booking> findLastBookingsForItems(@Param("itemIds") List<Long> itemIds,
+                                           @Param("status") BookingStatus status,
+                                           @Param("now") LocalDateTime now);
+
+    // Батч-загрузка следующих бронирований для нескольких вещей
+    @Query("select b from Booking b " +
+            "where b.item.id in :itemIds " +
+            "and b.status = :status " +
+            "and b.start > :now " +
+            "order by b.item.id, b.start asc")
+    List<Booking> findNextBookingsForItems(@Param("itemIds") List<Long> itemIds,
+                                           @Param("status") BookingStatus status,
+                                           @Param("now") LocalDateTime now);
 
     // Проверка возможности оставить комментарий
     @Query("select count(b) > 0 from Booking b " +
             "where b.booker.id = :userId " +
             "and b.item.id = :itemId " +
-            "and b.status = 'APPROVED' " +
+            "and b.status = :status " +
             "and b.end < :now")
     boolean existsCompletedBooking(@Param("userId") Long userId,
                                    @Param("itemId") Long itemId,
+                                   @Param("status") BookingStatus status,
                                    @Param("now") LocalDateTime now);
 }
