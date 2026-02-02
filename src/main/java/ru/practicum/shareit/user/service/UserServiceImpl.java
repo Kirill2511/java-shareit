@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
             existingUser.setEmail(userDto.getEmail());
         }
 
-        User updatedUser = userRepository.update(existingUser);
+        User updatedUser = userRepository.save(existingUser);
         log.info("Updated user with id: {}", id);
         return UserMapper.toDto(updatedUser);
     }
@@ -86,9 +86,16 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateEmailUniqueness(String email, Long excludeUserId) {
-        userRepository.findByEmail(email, excludeUserId)
-                .ifPresent(existingUser -> {
-                    throw new ConflictException("Email already in use: " + email);
-                });
+        if (excludeUserId != null) {
+            userRepository.findByEmailExcluding(email, excludeUserId)
+                    .ifPresent(existingUser -> {
+                        throw new ConflictException("Email already in use: " + email);
+                    });
+        } else {
+            userRepository.findByEmail(email)
+                    .ifPresent(existingUser -> {
+                        throw new ConflictException("Email already in use: " + email);
+                    });
+        }
     }
 }

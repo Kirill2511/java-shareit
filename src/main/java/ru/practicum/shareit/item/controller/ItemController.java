@@ -5,10 +5,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDetailDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingsDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -29,15 +33,16 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@PathVariable Long itemId) {
+    public ItemDetailDto getById(@PathVariable Long itemId,
+            @RequestHeader(value = USER_ID_HEADER, required = false) Long userId) {
         log.info("GET /items/{} - Getting item by id", itemId);
-        return itemService.getById(itemId);
+        return itemService.getById(itemId, userId);
     }
 
     @GetMapping
-    public Collection<ItemDto> getByOwner(@RequestHeader(USER_ID_HEADER) Long ownerId) {
+    public List<ItemWithBookingsDto> getByOwner(@RequestHeader(USER_ID_HEADER) Long ownerId) {
         log.info("GET /items - Getting all items for owner: {}", ownerId);
-        return itemService.getByOwnerId(ownerId);
+        return itemService.getByOwnerIdWithBookings(ownerId);
     }
 
     @PatchMapping("/{itemId}")
@@ -60,5 +65,13 @@ public class ItemController {
     public Collection<ItemDto> search(@RequestParam(defaultValue = "") String text) {
         log.info("GET /items/search?text={} - Searching items", text);
         return itemService.search(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestHeader(USER_ID_HEADER) Long userId,
+            @PathVariable Long itemId,
+            @Valid @RequestBody CommentDto commentDto) {
+        log.info("POST /items/{}/comment - User {} adding comment", itemId, userId);
+        return itemService.addComment(userId, itemId, commentDto);
     }
 }
