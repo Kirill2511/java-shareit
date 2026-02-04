@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-@SuppressWarnings("null")
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
@@ -126,7 +125,8 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime now = LocalDateTime.now();
         List<Booking> bookings = switch (state) {
             case ALL -> bookingRepository.findByBookerId(bookerId, sort);
-            case CURRENT -> bookingRepository.findCurrentByBookerId(bookerId, now, sort);
+            case CURRENT ->
+                    bookingRepository.findByBookerIdAndStartLessThanEqualAndEndGreaterThanEqual(bookerId, now, now, sort);
             case PAST -> bookingRepository.findByBookerIdAndEndBefore(bookerId, now, sort);
             case FUTURE -> bookingRepository.findByBookerIdAndStartAfter(bookerId, now, sort);
             case WAITING -> bookingRepository.findByBookerIdAndStatus(bookerId, BookingStatus.WAITING, sort);
@@ -148,9 +148,10 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime now = LocalDateTime.now();
         List<Booking> bookings = switch (state) {
             case ALL -> bookingRepository.findByItemOwnerId(ownerId, sort);
-            case CURRENT -> bookingRepository.findCurrentByItemOwnerId(ownerId, now, sort);
-            case PAST -> bookingRepository.findPastByItemOwnerId(ownerId, now, sort);
-            case FUTURE -> bookingRepository.findFutureByItemOwnerId(ownerId, now, sort);
+            case CURRENT ->
+                    bookingRepository.findByItemOwnerIdAndStartLessThanEqualAndEndGreaterThanEqual(ownerId, now, now, sort);
+            case PAST -> bookingRepository.findByItemOwnerIdAndEndBefore(ownerId, now, sort);
+            case FUTURE -> bookingRepository.findByItemOwnerIdAndStartAfter(ownerId, now, sort);
             case WAITING -> bookingRepository.findByItemOwnerIdAndStatus(ownerId, BookingStatus.WAITING, sort);
             case REJECTED -> bookingRepository.findByItemOwnerIdAndStatus(ownerId, BookingStatus.REJECTED, sort);
         };

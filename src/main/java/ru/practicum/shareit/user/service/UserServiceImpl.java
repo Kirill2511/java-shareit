@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("null")
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -88,7 +87,7 @@ public class UserServiceImpl implements UserService {
 
     private void validateEmailUniqueness(String email, Long excludeUserId) {
         if (excludeUserId != null) {
-            userRepository.findByEmailExcluding(email, excludeUserId)
+            userRepository.findByEmailAndIdNot(email, excludeUserId)
                     .ifPresent(existingUser -> {
                         throw new ConflictException("Email already in use: " + email);
                     });

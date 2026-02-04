@@ -34,7 +34,7 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemDetailDto getById(@PathVariable Long itemId,
-            @RequestHeader(value = USER_ID_HEADER, required = false) Long userId) {
+                                 @RequestHeader(value = USER_ID_HEADER, required = false) Long userId) {
         log.info("GET /items/{} - Getting item by id", itemId);
         return itemService.getById(itemId, userId);
     }
@@ -69,8 +69,8 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(@RequestHeader(USER_ID_HEADER) Long userId,
-            @PathVariable Long itemId,
-            @Valid @RequestBody CommentDto commentDto) {
+                                 @PathVariable Long itemId,
+                                 @Valid @RequestBody CommentDto commentDto) {
         log.info("POST /items/{}/comment - User {} adding comment", itemId, userId);
         return itemService.addComment(userId, itemId, commentDto);
     }

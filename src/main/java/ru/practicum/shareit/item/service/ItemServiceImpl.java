@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-@SuppressWarnings("null")
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
@@ -62,7 +61,7 @@ public class ItemServiceImpl implements ItemService {
         Booking nextBooking = null;
 
         // Показываем бронирования только владельцу
-        if (userId != null && item.getOwner().getId().equals(userId)) {
+        if (item.getOwner().getId().equals(userId)) {
             lastBooking = bookingRepository.findFirstLastBooking(
                     item.getId(), BookingStatus.APPROVED, now);
 
@@ -84,35 +83,18 @@ public class ItemServiceImpl implements ItemService {
         userService.findUserEntityById(ownerId); // validates owner exists
 
         List<Item> items = itemRepository.findByOwnerId(ownerId);
-        if (items.isEmpty()) {
-            return List.of();
-        }
-
         LocalDateTime now = LocalDateTime.now();
-        List<Long> itemIds = items.stream().map(Item::getId).toList();
-
-        // Батч-загрузка бронирований для всех вещей
-        List<Booking> lastBookings = bookingRepository.findLastBookingsForItems(
-                itemIds, BookingStatus.APPROVED, now);
-        List<Booking> nextBookings = bookingRepository.findNextBookingsForItems(
-                itemIds, BookingStatus.APPROVED, now);
-
-        // Группировка бронирований по itemId (берем только первое для каждой вещи)
-        var lastBookingMap = lastBookings.stream()
-                .collect(Collectors.groupingBy(
-                        b -> b.getItem().getId(),
-                        Collectors.collectingAndThen(Collectors.toList(), list -> list.get(0))));
-
-        var nextBookingMap = nextBookings.stream()
-                .collect(Collectors.groupingBy(
-                        b -> b.getItem().getId(),
-                        Collectors.collectingAndThen(Collectors.toList(), list -> list.get(0))));
 
         return items.stream()
-                .map(item -> ItemMapper.toWithBookingsDto(
-                        item,
-                        lastBookingMap.get(item.getId()),
-                        nextBookingMap.get(item.getId())))
+                .map(item -> {
+                    Booking lastBooking = bookingRepository.findFirstLastBooking(
+                            item.getId(), BookingStatus.APPROVED, now);
+
+                    Booking nextBooking = bookingRepository.findFirstNextBooking(
+                            item.getId(), BookingStatus.APPROVED, now);
+
+                    return ItemMapper.toWithBookingsDto(item, lastBooking, nextBooking);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -181,7 +163,7 @@ public class ItemServiceImpl implements ItemService {
 
         // Check if user has completed booking for this item
         LocalDateTime now = LocalDateTime.now();
-        boolean hasCompletedBooking = bookingRepository.existsCompletedBooking(
+        boolean hasCompletedBooking = bookingRepository.existsByBookerIdAndItemIdAndStatusAndEndBefore(
                 userId, itemId, BookingStatus.APPROVED, now);
 
         if (!hasCompletedBooking) {
