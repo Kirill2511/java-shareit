@@ -43,18 +43,18 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestResponseDto> getByRequestor(Long userId) {
         getUserOrThrow(userId);
         List<ItemRequest> requests = itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(userId);
-        
+
         List<Long> requestIds = requests.stream()
                 .map(ItemRequest::getId)
                 .toList();
-        
+
         Map<Long, List<Item>> itemsByRequestId = itemRepository.findAllByRequestIdIn(requestIds)
                 .stream()
                 .collect(Collectors.groupingBy(item -> item.getRequest().getId()));
-        
+
         return requests.stream()
                 .map(request -> ItemRequestMapper.toItemRequestResponseDto(
-                        request, 
+                        request,
                         itemsByRequestId.getOrDefault(request.getId(), List.of())
                 ))
                 .toList();
@@ -64,18 +64,18 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestResponseDto> getAll(Long userId) {
         getUserOrThrow(userId);
         List<ItemRequest> requests = itemRequestRepository.findAllByRequestorIdNotOrderByCreatedDesc(userId);
-        
+
         List<Long> requestIds = requests.stream()
                 .map(ItemRequest::getId)
                 .toList();
-        
+
         Map<Long, List<Item>> itemsByRequestId = itemRepository.findAllByRequestIdIn(requestIds)
                 .stream()
                 .collect(Collectors.groupingBy(item -> item.getRequest().getId()));
-        
+
         return requests.stream()
                 .map(request -> ItemRequestMapper.toItemRequestResponseDto(
-                        request, 
+                        request,
                         itemsByRequestId.getOrDefault(request.getId(), List.of())
                 ))
                 .toList();
