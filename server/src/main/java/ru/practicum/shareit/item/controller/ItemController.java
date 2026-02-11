@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,7 +26,7 @@ public class ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto create(@RequestHeader(USER_ID_HEADER) Long ownerId,
-                          @Valid @RequestBody ItemDto itemDto) {
+            @RequestBody ItemDto itemDto) {
         log.info("POST /items - Creating item: {} for user: {}", itemDto.getName(), ownerId);
         return itemService.create(ownerId, itemDto);
     }
@@ -70,7 +69,7 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(@RequestHeader(USER_ID_HEADER) Long userId,
                                  @PathVariable Long itemId,
-                                 @Valid @RequestBody CommentDto commentDto) {
+            @RequestBody CommentDto commentDto) {
         log.info("POST /items/{}/comment - User {} adding comment", itemId, userId);
         return itemService.addComment(userId, itemId, commentDto);
     }

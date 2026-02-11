@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +16,6 @@ public class CommentDto {
 
     private Long id;
 
-    @NotBlank(message = "Comment text cannot be blank")
     private String text;
 
     private String authorName;

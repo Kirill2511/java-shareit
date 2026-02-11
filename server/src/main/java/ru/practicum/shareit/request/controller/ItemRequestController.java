@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,7 +23,7 @@ public class ItemRequestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemRequestResponseDto create(@RequestHeader(USER_ID_HEADER) Long userId,
-                                         @Valid @RequestBody ItemRequestDto itemRequestDto) {
+            @RequestBody ItemRequestDto itemRequestDto) {
         log.info("POST /requests - Creating item request for user: {}", userId);
         return itemRequestService.create(userId, itemRequestDto);
     }
